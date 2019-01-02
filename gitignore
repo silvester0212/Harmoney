@@ -1,2 +1,2 @@
 # Do not sync any files inside ./data
-./data/*
+/data
