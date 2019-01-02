@@ -52,7 +52,7 @@ def initializePersons():
 	Persons.append(PersonBoth)
 	Functions.makeFile(PERSONS_FILE, json.dumps([p.toJSON() for p in Persons]))
 
-# initializePersons()
+initializePersons()
 
 PersonsLst = loadPersons()
 
