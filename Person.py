@@ -1,60 +1,74 @@
 import json
+import os
 import Functions
-from Global import *
+from pathlib import Path
+
+import Global
+
+_PersonPath = Global.PERSONS_PATH
 
 class Person:
-	def __init__ (self, _name, _abrv):
+	def __init__ (self, _name):
 		self.Name = _name
-		self.Abbreviation = _abrv
 
 	def __repr__(self):
-		return "Person " + self.Name + " w/ Abbreviation " + self.Abbreviation
+		return "Person " + self.Name
 
 	def __dict__(self):
 		dict = {}
-		dict['name'] = self.Name
-		dict['abrv'] = self.Abbreviation
+		dict['Name'] = self.Name
 		return dict
 
 	def toJSON(self):
-		# return json.dumps(self, default=lambda o:o.__dict__(), sort_keys = False, indent = 4)
 		return json.dumps(self.__dict__(), indent = 4)
 
 
 def loadPersons():
-	PersonsObj = json.loads(open(PERSONS_FILE).read())
-	PersonsLst = []
-	# print(Persons)
+	PersonsDict = {}
 
-	for p in PersonsObj:
-		personObj = json.loads(p)
-		PersonsLst.append(makePersonFromJSON(personObj))
+	if (not (Path(_PersonPath)).is_dir()):
+		# Persons Path do not exist
+		return PersonsDict
 
-	return PersonsLst
+	# Persons Path exists, load persons (one person per file)
+	for personJsonFile in os.listdir(_PersonPath):
+		if (not personJsonFile.endswith('.json')):
+			continue
+
+		personJsonObj = json.loads(open(_PersonPath + '/' + personJsonFile).read())
+		curPerson = makePersonFromJSON(personJsonObj)
+		PersonsDict[curPerson.Name] = curPerson
+		print(curPerson)
+
+	return PersonsDict
 
 def makePersonFromJSON(jsonObj):
-	name = jsonObj["name"]
-	abrv = jsonObj["abrv"]
-	return Person(name, abrv)
+	name = jsonObj['Name']
+	return Person(name)
 
-def makePerson(_name, _abrv):
-	return Person(_name, _abrv)
+def makePerson(_name):
+	p = Person(_name)
+	Functions.makeFile(_PersonPath + '/' + p.Name + '.json', p.toJSON())
+	return p
 
 def initializePersons():
-	# Initialization
-	Persons = []
-	PersonSY = makePerson("Silvester Yao", "SY")
-	PersonMG = makePerson("Menglu Gao", "MG")
-	PersonBoth = makePerson("Both", "Both")
-	# Functions.makeFile(PERSONS_FILE, json.dumps(PersonSY.__dict__()))
-	Persons.append(PersonSY)
-	Persons.append(PersonMG)
-	Persons.append(PersonBoth)
-	Functions.makeFile(PERSONS_FILE, json.dumps([p.toJSON() for p in Persons]))
+	# Initialization of all persons
+	PersonSY 		= makePerson("SY")
+	PersonMG 		= makePerson("MG")
+	PersonBoth 		= makePerson("Both")
+	PersonFriend 	= makePerson("Friend")
 
-initializePersons()
+def getOrMakePerson(_name):
+	if (Global.PersonsDict is None):
+		Global.PersonsDict = loadPersons()
 
-PersonsLst = loadPersons()
+	if (_name not in Global.PersonsDict):
+		newPerson = makePerson(_name)
+		Global.PersonsDict[_name] = newPerson
 
-for person in PersonsLst:
-	print(person)
+	return Global.PersonsDict[_name]
+
+# initializePersons()
+
+# load Persons to Global
+Global.PersonsDict = loadPersons()

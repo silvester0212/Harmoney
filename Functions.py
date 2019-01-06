@@ -26,4 +26,4 @@ def makeDirectory(directoryFullPath):
 	os.makedirs(directoryFullPath)
 	return
 
-# makeFile(ROOT_PATH + '/data/Persons.json', 'Empty File')
+
