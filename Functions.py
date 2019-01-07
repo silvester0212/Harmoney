@@ -26,4 +26,7 @@ def makeDirectory(directoryFullPath):
 	os.makedirs(directoryFullPath)
 	return
 
-
+def convertNone(str):
+	# if (str == 'None'):
+		# return None
+	return str

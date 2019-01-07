@@ -1,8 +1,8 @@
 import json
 import os
-import Functions
 from pathlib import Path
 
+import Functions
 import Global
 
 _PersonPath = Global.PERSONS_PATH
@@ -23,47 +23,47 @@ class Person:
 		return json.dumps(self.__dict__(), indent = 4)
 
 
-def loadPersons():
+def getPersonFromJSON(jsonObj):
+	name = jsonObj['Name']
+	return Person(name)
+
+def createPersonFromName(_name):
+	p = Person(_name)
+	Functions.makeFile(_PersonPath + '/' + p.Name + '.json', p.toJSON())
+	return p
+
+def readPersons():
 	PersonsDict = {}
 
 	if (not (Path(_PersonPath)).is_dir()):
 		# Persons Path do not exist
 		return PersonsDict
 
-	# Persons Path exists, load persons (one person per file)
+	# Persons Path exists, read persons (one person per file)
 	for personJsonFile in os.listdir(_PersonPath):
 		if (not personJsonFile.endswith('.json')):
 			continue
 
 		personJsonObj = json.loads(open(_PersonPath + '/' + personJsonFile).read())
-		curPerson = makePersonFromJSON(personJsonObj)
+		curPerson = getPersonFromJSON(personJsonObj)
 		PersonsDict[curPerson.Name] = curPerson
-		print(curPerson)
+		# print(curPerson)
 
 	return PersonsDict
 
-def makePersonFromJSON(jsonObj):
-	name = jsonObj['Name']
-	return Person(name)
-
-def makePerson(_name):
-	p = Person(_name)
-	Functions.makeFile(_PersonPath + '/' + p.Name + '.json', p.toJSON())
-	return p
-
 def initializePersons():
 	# Initialization of all persons
-	PersonSY 		= makePerson("SY")
-	PersonMG 		= makePerson("MG")
-	PersonBoth 		= makePerson("Both")
-	PersonFriend 	= makePerson("Friend")
+	PersonSY 		= createPersonFromName("SY")
+	PersonMG 		= createPersonFromName("MG")
+	PersonBoth 		= createPersonFromName("Both")
+	PersonFriend 	= createPersonFromName("Friend")
 
-def getOrMakePerson(_name):
+def getOrCreatePerson(_name):
 	if (Global.PersonsDict is None):
-		Global.PersonsDict = loadPersons()
+		Global.PersonsDict = readPersons()
 
 	if (_name not in Global.PersonsDict):
-		newPerson = makePerson(_name)
+		newPerson = createPersonFromName(_name)
 		Global.PersonsDict[_name] = newPerson
 
 	return Global.PersonsDict[_name]
@@ -71,4 +71,4 @@ def getOrMakePerson(_name):
 # initializePersons()
 
 # load Persons to Global
-Global.PersonsDict = loadPersons()
+Global.PersonsDict = readPersons()
